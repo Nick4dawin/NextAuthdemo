@@ -1,7 +1,12 @@
-import { auth } from "../auth"
-export default auth((req) => {
+
+import { Middleware } from "next/dist/lib/load-custom-routes";
+import authConfig from "./auth.config";
+import NextAuth from "next-auth";
+const {auth} = NextAuth(authConfig);
+export default auth((req : any) => {
+  const isLoggedIn = !!req.auth;
   console.log("Route:",req.nextUrl.pathname)
-  console.log("Middleware Running")
+  console.log("Is logged in:",isLoggedIn)
 })
 
 // Optionally, don't invoke Middleware on some paths
