@@ -11,18 +11,34 @@ export const {
   signIn,
   signOut
 } = NextAuth({
+  events:{
+    async linkAccount({user}){
+      await db.user.update ({
+        where: {
+          id: user.id
+        },
+        data: {
+          emailVerified: new Date()
+        }
+      })
+    }
+  },
   callbacks:{
     //TODO LATER
-    // async signIn({user}){
-    //   const existingUser = await getUserById(user.id!);
-    //   if(!existingUser || !existingUser.emailVerified){
-    //     return false;
-    //   }
-    //   return true;
-    // },
+    async signIn({user}){
+      //Allow Oauth without email Verification
+      if(account?.provider !== 'credentials') return true;
+      const existingUser = await getUserById(user.id!);
+      //Prevent signin without email verification
+      if(!existingUser || !existingUser.emailVerified){
+        return false;
+        //Add 2FA check
+      }
+      return true;
+    },
     //assign role to session.user by token.role and assign id to session.user by token.sub
     async session({token,session}){
-      console.log("Session token: ",{token})
+      //console.log("Session token: ",{token})
      
       if(session.user && token.sub){
         session.user.id = token.sub;
